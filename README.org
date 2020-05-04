@@ -1,0 +1,135 @@
+* dockman - Docker Manager Tool 
+** Introduction 
+
+This tool simplifies using of docker containers for testing and
+exploring programming languages toolchain; compilers and servers
+encapsulated in containers. Dockman is wrapper around 'docker' client
+with convenient command line switches and default converntions which
+makes easier to use development tools from docker image. 
+
+By using containers, the user can access a full-featured toolchain for a
+given programming language without any installation effort or running
+the risk of currently installed toolchain. For instance, it is far
+easier and faster to run a new GCC (GNU C) compiler version from a
+container than installing it on the current machine risking breaking
+the current GCC installation. 
+** Examples 
+*** Show help
+
+#+BEGIN_SRC sh 
+  $ ./dockman.bin --help
+
+   dockman - Docker Manager Tool
+
+  Usage: $ dockman <SUBCOMMAND> <DOCKER-IMAGE> [<OPTIONS>...]
+
+   => Run docker-image unix shell (REPL) or any other entrypoint.
+   $ dockman shell <DOCKER-IMAGE> [<OPTIONS>...] 
+
+   => Run docker-image as daemon (aka service) 
+   $ dockman daemon <DOCKER-IMAGE> [<OPTIONS>...] 
+
+   => Build docker image from file 
+   $ dockman build <DOCKER-IMAGE=-NAME> <DOCKER-FILE>
+
+   Options:
+        --verbose Log docker commands for debugging.
+  -w    --workdir Working directory, default current directory of host.
+  -n       --name Human-readable name for container.
+  -c    --command Command to be executed by image entrypoint
+  -e --entrypoint Alternative entrypoint.
+  -x        --x11 Enable X11 GUI graphical user interface
+  -u       --user Alternative user.
+  -m       --home Mount $HOME directory to /uhome dir. in container.
+  -v     --volume Volume to be mounted.
+  -h       --help This help information.
+#+END_SRC
+*** Running shell (bash) in a docker-image with D-Language compiler
+
+Get current directory and list it (before running docker image)
+
+#+BEGIN_SRC sh 
+  $ pwd
+  /home/archbox/Documents/projects/dockman.dlang
+
+  # List files of current directory 
+  $ ls
+  dockman.bin*  dockman.d  dockman.o  Makefile  README.org
+#+END_SRC
+
+Run shell (bash) in docker image 'docker.io/dlangchina/dlang-dmd'
+mounting current directory to the '/work' directory in the container
+which is set as the current working directory. 
+
+#+BEGIN_SRC sh 
+  $ ./dockman.bin shell docker.io/dlangchina/dlang-dmd --verbose
+
+   [TRACE] Mount /home/archbox/Documents/projects/dockman.dlang to /work 
+   [TRACE] Mount /home/archbox to /uhome 
+   Docker command run: 
+   ["docker", "run", "-it", "--rm", "-v", "/home/archbox/Documents/projects/dockman.dlang:/work", "-w", "/work", "docker.io/dlangchina/dlang-dmd"]
+   root@c8dbe6974808:/work# 
+
+   root@c8dbe6974808:/work# pwd
+
+   root@c8dbe6974808:/work# ls
+   Makefile  README.org  dockman.bin  dockman.d  dockman.o
+#+END_SRC
+
+Check DMD compiler. 
+
+#+BEGIN_SRC sh 
+  root@c8dbe6974808:/work# dmd --version
+  DMD64 D Compiler v2.091.1
+  Copyright (C) 1999-2020 by The D Language Foundation, All Rights Reserved written by Walter Bright
+#+END_SRC
+
+Build dockman.d with the Docker container shell.
+
+#+BEGIN_SRC sh 
+  # Compile 
+  #---------------------------------------------------------
+  root@c8dbe6974808:/work# dmd dockman.d -of=dockman.elf
+
+  # Test 
+  #---------------------------------------------------------
+  root@c8dbe6974808:/work# ./dockman.elf 
+   dockman - Docker Manager Tool
+
+  Usage: $ dockman <SUBCOMMAND> <DOCKER-IMAGE> [<OPTIONS>...]
+
+   => Run docker-image unix shell (REPL) or any other entrypoint.
+   $ dockman shell <DOCKER-IMAGE> [<OPTIONS>...] 
+
+  ... ... ... ... ... ... ... ... ... ... ... ... 
+  ... ... ... ... ... ... ... ... ... ... ... ... 
+
+#+END_SRC
+
+** Building Instructions
+
+Dockman is written in [[https://en.wikipedia.org/wiki/D_(programming_language)][D programming language]] and has the following
+compilation options: 
+
+ + Option 1:
+   + Compilation with system-installed *DMD* (D-Language compiler). 
+
+#+BEGIN_SRC sh 
+  $ make build1 
+
+  # Show help 
+  $ ./dockman.bin --help
+#+END_SRC
+
+ + Option 2: Compilation using the Docker image
+   + The advantage of this option is that the D-language tooling don't
+     need to be installed in the system as the toolings are provided
+     by docker image [[https://github.com/dlangchina/docker-dlang][dlangchina/docker-dlang]]. It only needs a _docker_
+     instalation. 
+
+#+BEGIN_SRC sh 
+  $ make build2 
+
+  # Show help 
+  $ ./dockman.bin --help
+#+END_SRC
