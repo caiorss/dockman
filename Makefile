@@ -11,5 +11,9 @@ build1: dockman.d
 build2:
 	docker run --rm -it -v $(shell pwd):/work -w /work dlangchina/dlang-dmd dmd dockman.d -of=dockman.bin
 
+# Assumes that ~/bin directory is in $PATH variable 
+install:
+	cp -v ./dockman.bin ~/bin/dockman
+
 clean:
 	rm -rf -v *.bin *.o
