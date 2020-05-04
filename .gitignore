@@ -1,0 +1,11 @@
+*.exe
+*.bin
+*.so
+*.dll
+*.vscode
+*.temp
+*.back
+~*
+*~
+#*.
+*.#
