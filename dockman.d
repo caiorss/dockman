@@ -19,6 +19,7 @@ void main(string[] args)
         string name       = null;
         string workdir    = null; 
         string[] volumes  = null;
+        string[] ports    = null;
 
         bool dont_remove_container = false;
 
@@ -36,6 +37,7 @@ void main(string[] args)
                                 ,"u|user",       "Alternative user.", &user
                                 ,"m|home",       "Mount $HOME directory to /uhome dir. in container." ,&home                                
                                 ,"v|volume",     "Volume to be mounted.", &volumes
+                                ,"p|port",       "Host port to be mapped to container.", &ports
                                 /* ,"r|drmc",       "Dont remove container (default false)", &dont_remove_container */
                         );
 
@@ -76,13 +78,13 @@ void main(string[] args)
 
                 if(args[1] == "shell")  
                         docker_shell( args[2], workdir, entrypoint, command, user, name
-                                        , home, x11, verbose, false, false, volumes);        
+                                        , home, x11, verbose, false, false, volumes, ports);        
                 
                 if(args[1] == "daemon"){ 
                         bool flag_dont_remove_container = name != null;
                         docker_shell( args[2], workdir, entrypoint, command, user, name
                                         , home, x11, verbose, true
-                                        , flag_dont_remove_container, volumes);        
+                                        , flag_dont_remove_container, volumes, ports);        
                 }
                 
                 if(args[1] == "build")
@@ -112,6 +114,7 @@ void docker_shell(  string docker_image
                       , bool enable_daemon  = false
                       , bool dont_remove_container = false
                       , string[] volumes    = []
+                      , string[] ports      = []
                      )
 {
         auto docker_args = ["docker", "run", "-it"]; 
@@ -166,6 +169,11 @@ void docker_shell(  string docker_image
         {                        
                 //assert(v.split(":").length != 2);
                 docker_args ~= ["-v", v];
+        }
+
+        foreach (p; ports)
+        {
+                docker_args ~= ["-p", p];
         }
         
         docker_args ~= [ docker_image ];
