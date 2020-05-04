@@ -16,8 +16,10 @@ void main(string[] args)
         string command    = null;
         string user       = null;
         string name       = null;
-
+        string workdir    = null; 
         string[] volumes  = null;
+
+        bool dont_remove_container = false;
 
         opt.GetoptResult opt_result;
 
@@ -25,6 +27,7 @@ void main(string[] args)
                 opt_result = opt.getopt(
                                 args
                                 ,"verbose",      "Log docker commands for debugging.", &verbose
+                                ,"w|workdir",    "Working directory, default current directory of host.", &workdir
                                 ,"n|name",       "Human-readable name for container." ,&name
                                 ,"c|command",    "Command to be executed by image entrypoint", &command
                                 ,"e|entrypoint", "Alternative entrypoint.", &entrypoint
@@ -32,6 +35,7 @@ void main(string[] args)
                                 ,"u|user",       "Alternative user.", &user
                                 ,"m|home",       "Mount $HOME directory to /uhome dir. in container." ,&home                                
                                 ,"v|volume",     "Volume to be mounted.", &volumes
+                                /* ,"r|drmc",       "Dont remove container (default false)", &dont_remove_container */
                         );
 
                 if (opt_result.helpWanted)
@@ -64,12 +68,15 @@ void main(string[] args)
                 }
 
                 if(args[1] == "shell")  
-                        run_docker_shell( args[2], entrypoint, command, user, name
-                                        , home, x11, verbose, false, volumes);        
+                        run_docker_shell( args[2], workdir, entrypoint, command, user, name
+                                        , home, x11, verbose, false, false, volumes);        
                 
-                if(args[1] == "daemon") 
-                        run_docker_shell( args[2], entrypoint, command, user, name
-                                        , home, x11, verbose, true, volumes);        
+                if(args[1] == "daemon"){ 
+                        bool flag_dont_remove_container = name != null;
+                        run_docker_shell( args[2], workdir, entrypoint, command, user, name
+                                        , home, x11, verbose, true
+                                        , flag_dont_remove_container, volumes);        
+                }
                 
                 if(args[1] == "build")
                         build_docker_image(args[2], args[3]);
@@ -87,6 +94,7 @@ void main(string[] args)
 } // ------ End of main() ------------- //
 
 void run_docker_shell(  string docker_image
+                      , string workdir      = null 
                       , string entrypoint   = null 
                       , string command      = null 
                       , string user         = null 
@@ -94,19 +102,21 @@ void run_docker_shell(  string docker_image
                       , bool enable_home    = false
                       , bool enable_x11     = false
                       , bool enable_verbose = false 
-                      , bool enable_dameon  = false
+                      , bool enable_daemon  = false
+                      , bool dont_remove_container = false
                       , string[] volumes    = []
                      )
 {
-        auto docker_args = ["docker", "run", "--rm", "-it"]; 
+        auto docker_args = ["docker", "run", "-it"]; 
 
         // Get current directory 
         string cwd = sf.getcwd();
         // Get home directory 
         string home = sp.environment.get("HOME");
 
-        if(enable_dameon)
-                docker_args ~= ["--detach"];
+        if( !dont_remove_container ) docker_args ~= ["--rm"];
+
+        if(enable_daemon) docker_args ~= ["--detach"];
 
         if(user != null){
                 if(enable_verbose) io.writefln(" [TRACE] User changed to: '%s'", user);
@@ -117,9 +127,12 @@ void run_docker_shell(  string docker_image
                 docker_args ~= ["--name", name];
         }
 
-        if(enable_verbose) io.writefln(" [TRACE] Mount %s to /work ", cwd);
+        // Directory to be mounted to '/work' dir in container. 
+        string wdir = workdir != null ? workdir : cwd;
+
+        if(enable_verbose) io.writefln(" [TRACE] Mount %s to /work ", wdir);
         // Concatenate list 
-        docker_args ~= ["-v", cwd ~ ":/work"];
+        docker_args ~= ["-v", wdir ~ ":/work"];
         // Set /work as current directory in container 
         docker_args ~= ["-w", "/work"];
         
