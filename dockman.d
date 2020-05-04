@@ -79,7 +79,7 @@ void main(string[] args)
                 }
                 
                 if(args[1] == "build")
-                        build_docker_image(args[2], args[3]);
+                        docker_build(args[2], args[3]);
 
         } catch (opt.GetOptException) 
         {
@@ -169,7 +169,7 @@ void docker_shell(  string docker_image
         sp.wait(d1);
 }
 
-void build_docker_image(string image_name, string docker_file)
+void docker_build(string image_name, string docker_file)
 {
         auto docker_args = [ "docker", "build", "-f", docker_file, "-t", image_name, "."];
         auto d1 = sp.spawnProcess(docker_args);            
