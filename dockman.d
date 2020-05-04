@@ -68,12 +68,12 @@ void main(string[] args)
                 }
 
                 if(args[1] == "shell")  
-                        run_docker_shell( args[2], workdir, entrypoint, command, user, name
+                        docker_shell( args[2], workdir, entrypoint, command, user, name
                                         , home, x11, verbose, false, false, volumes);        
                 
                 if(args[1] == "daemon"){ 
                         bool flag_dont_remove_container = name != null;
-                        run_docker_shell( args[2], workdir, entrypoint, command, user, name
+                        docker_shell( args[2], workdir, entrypoint, command, user, name
                                         , home, x11, verbose, true
                                         , flag_dont_remove_container, volumes);        
                 }
@@ -93,7 +93,7 @@ void main(string[] args)
 
 } // ------ End of main() ------------- //
 
-void run_docker_shell(  string docker_image
+void docker_shell(  string docker_image
                       , string workdir      = null 
                       , string entrypoint   = null 
                       , string command      = null 
