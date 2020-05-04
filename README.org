@@ -211,7 +211,7 @@ set to '/etc' directory of host machine.
 
 #+END_SRC
 
-*** Docke image for compiling and running TypeScript 
+*** Docker image for compiling and running TypeScript 
 
 This example uses the following alpine-based Docker image for
 compiling and running typescript [[https://hub.docker.com/r/sandrokeil/typescript][sandrokeil/typescript]] (source code:
@@ -328,6 +328,154 @@ Running with nodeJS: (Show docker command line swiches in verbose mode)
   j = 9
   j = 100
   j = 52
+#+END_SRC
+
+*** Docker image with C++ CERN's Root CLing REPL 
+
+The Root REPL developed by CERN allows evaluating and playing with
+most of C++ (mostly C++11 supported) and supported 'C' subset of C++
+interactively without any compilation. 
+
+ + Example 1: Interactive CLing REPL 
+
+#+BEGIN_SRC c++
+   $ dockman shell dhavenith/jupyter-cling -e=cling
+
+   ****************** CLING ******************
+   * Type C++ code and press enter to run it *
+   *             Type .q to exit             *
+   *******************************************
+   [cling]$ 
+   [cling]$ 
+
+   [cling]$ #include <iostream>
+   [cling]$ #include <vector>
+   [cling]$ #include <algorithm>
+   [cling]$ #include <numeric>
+
+   [cling]$ auto xs = std::vector<double>{2.5, 10.523, 9.25, -10.356, 9.726, 10.53}
+
+   [cling]$ std::accumulate(xs.begin(), xs.end(), 0.0)
+   (double) 32.173
+
+   // ---=>> Create a lambda function <<=== ----------------//
+   [cling]$ auto print_value = [](double x){ std::cout << " x = " << x << "\n"; }
+   ((lambda) &) @0x7fb6af18e030
+
+   [cling]$ std::for_each(xs.begin(), xs.end(), print_value);
+    x = 2.5
+    x = 10.523
+    x = 9.25
+    x = -10.356
+    x = 9.726
+    x = 10.53
+   [cling]$ 
+#+END_SRC
+
+ + Example 2: Run [[https://en.wikipedia.org/wiki/Project_Jupyter][Jupyter Notebook]] web server with C++ support (CLing REPL)
+   + To access the Jupuyter Server, open the URL (
+     ~http://127.0.0.1:8888/?token=0ab60534327956dcc9012bb955ffa772f589839f6759eab6~)
+     in the web browser. 
+
+#+BEGIN_SRC sh 
+   $ dockman shell dhavenith/jupyter-cling -p=8888:8888 --verbose
+    [TRACE] Mount /home/archbox/Documents/projects/dockman.dlang to /work 
+    Docker command run: 
+    ["docker", "run", "-it", "--rm", "-v", "/home/user/server:/work", "-w", "/work", "-p", "8888:8888", "dhavenith/jupyter-cling"]
+
+   ** using mounted /work directory
+   [I 15:51:56.741 NotebookApp] Writing notebook server cookie secret to /home/notebooker/.local/share/jupyter/runtime/notebook_cookie_secret
+   [W 15:51:56.963 NotebookApp] WARNING: The notebook server is listening on all IP addresses and not using encryption. This is not recommended.
+   [I 15:51:56.967 NotebookApp] Serving notebooks from local directory: /work
+   [I 15:51:56.967 NotebookApp] The Jupyter Notebook is running at:
+   [I 15:51:56.967 NotebookApp] http://91fcb638b834:8888/?token=0ab60534327956dcc9012bb955ffa772f589839f6759eab6
+   [I 15:51:56.967 NotebookApp]  or http://127.0.0.1:8888/?token=0ab60534327956dcc9012bb955ffa772f589839f6759eab6
+   [I 15:51:56.967 NotebookApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+   [C 15:51:56.972 NotebookApp] 
+
+       To access the notebook, open this file in a browser:
+           file:///home/notebooker/.local/share/jupyter/runtime/nbserver-9-open.html
+       Or copy and paste one of these URLs:
+           http://91fcb638b834:8888/?token=0ab60534327956dcc9012bb955ffa772f589839f6759eab6
+        or http://127.0.0.1:8888/?token=0ab60534327956dcc9012bb955ffa772f589839f6759eab6
+
+     ...  ... ... ... ... ... ... ... ... ... ... 
+#+END_SRC
+
+ + Example 3: Run the previous example as daemon, without blocking the
+   current REPL. 
+
+Launch container as daemon: 
+
+#+BEGIN_SRC sh 
+  $ dockman daemon dhavenith/jupyter-cling -p=8888:8888 --name=jupyter-cpp-server
+  0f13910da196af6789a2ee0432518e2bec041b2fbde4414dc047d36d6d319d44
+#+END_SRC
+
+Show container logs: 
+
+#+BEGIN_SRC sh 
+   $ docker logs -f jupyter-cpp-server
+   ** using mounted /work directory
+   [I 16:00:38.061 NotebookApp] Writing notebook server cookie secret to /home/notebooker/.local/share/jupyter/runtime/notebook_cookie_secret
+   [W 16:00:38.274 NotebookApp] WARNING: The notebook server is listening on all IP addresses and not using encryption. This is not recommended.
+   [I 16:00:38.278 NotebookApp] Serving notebooks from local directory: /work
+   [I 16:00:38.278 NotebookApp] The Jupyter Notebook is running at:
+   [I 16:00:38.278 NotebookApp] http://0f13910da196:8888/?token=9be9c8aac1954430dc77815b60d3469b75b1e391d011d7cf
+   [I 16:00:38.278 NotebookApp]  or http://127.0.0.1:8888/?token=9be9c8aac1954430dc77815b60d3469b75b1e391d011d7cf
+   [I 16:00:38.278 NotebookApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+   [C 16:00:38.283 NotebookApp] 
+
+       To access the notebook, open this file in a browser:
+           file:///home/notebooker/.local/share/jupyter/runtime/nbserver-9-open.html
+       Or copy and paste one of these URLs:
+           http://0f13910da196:8888/?token=9be9c8aac1954430dc77815b60d3469b75b1e391d011d7cf
+        or http://127.0.0.1:8888/?token=9be9c8aac1954430dc77815b60d3469b75b1e391d011d7cf
+
+     ... ...   ... ...   ... ...   ... ...   ... ...   ... ...   ... ... 
+     ... ...   ... ...   ... ...   ... ...   ... ...   ... ...   ... ... 
+#+END_SRC
+
+Inspect container:
+
+#+BEGIN_SRC sh 
+  $ docker inspect jupyter-cpp-server
+  [
+      {
+          "Id": "0f13910da196af6789a2ee0432518e2bec041b2fbde4414dc047d36d6d319d44",
+          "Created": "2020-05-04T16:00:36.84126218Z",
+          "Path": "/bin/sh",
+          "Args": [
+              "-c",
+              "start-notebook.sh"
+          ],
+  ... ... ... ... ... ... ... ... ... ... ... ... ... 
+  ... ... ... ... ... ... ... ... ... ... ... 
+#+END_SRC
+
+Inspect container mapped TCP or UDP ports: 
+
+#+BEGIN_SRC 
+  $ docker port jupyter-cpp-server
+  8888/tcp -> 0.0.0.0:8888
+#+END_SRC
+
+Stop container: 
+
+#+BEGIN_SRC sh 
+  $ docker stop jupyter-cpp-server
+#+END_SRC
+
+Restart container: 
+
+#+BEGIN_SRC sh 
+  $ docker start jupyter-cpp-server
+#+END_SRC
+
+Force stopping and deleting container
+
+#+BEGIN_SRC sh 
+  $ docker rm -f jupyter-cpp-server
 #+END_SRC
 
 ** Building Instructions
