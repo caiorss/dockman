@@ -38,20 +38,20 @@ void main(string[] args)
                                 /* ,"r|drmc",       "Dont remove container (default false)", &dont_remove_container */
                         );
 
-                if (opt_result.helpWanted)
+                if (opt_result.helpWanted || args.length == 1)
                 {
                 
-                        io.writeln(" dkman - Docker Manager Tool");
-                        io.writeln("Usage: $ dkman <SUBCOMMAND> <DOCKER-IMAGE> [<OPTIONS>...]");
+                        io.writeln(" dockman - Docker Manager Tool\n");
+                        io.writeln("Usage: $ dockman <SUBCOMMAND> <DOCKER-IMAGE> [<OPTIONS>...]");
                         
                         io.writeln("\n => Run docker-image unix shell (REPL) or any other entrypoint.");
-                        io.writeln(" $ dkman shell <DOCKER-IMAGE> [<OPTIONS>...] ");
+                        io.writeln(" $ dockman shell <DOCKER-IMAGE> [<OPTIONS>...] ");
                         
                         io.writeln("\n => Run docker-image as daemon (aka service) ");
-                        io.writeln(" $ dkman daemon <DOCKER-IMAGE> [<OPTIONS>...] ");                        
+                        io.writeln(" $ dockman daemon <DOCKER-IMAGE> [<OPTIONS>...] ");                        
 
                         io.writeln("\n => Build docker image from file ");
-                        io.writeln(" $ dkman build <DOCKER-IMAGE=-NAME> <DOCKER-FILE>");                        
+                        io.writeln(" $ dockman build <DOCKER-IMAGE=-NAME> <DOCKER-FILE>");                        
 
 
                         opt.defaultGetoptPrinter("\n Options:", opt_result.options);
@@ -59,6 +59,12 @@ void main(string[] args)
                         return; 
                 }
                 
+                if(args[1] == "container-list" || args[1] == "cl")
+                {
+                        docker_container_list();
+                        return;
+                }
+
                 /+ auto arglist = args.filter!((string x) => !startsWith(x, "-"));
                 io.writeln(" arglist = ", arglist);
                  +/       
@@ -79,7 +85,7 @@ void main(string[] args)
                 }
                 
                 if(args[1] == "build")
-                        docker_build(args[2], args[3]);
+                        docker_build(args[2], args[3]);                
 
         } catch (opt.GetOptException) 
         {
@@ -167,6 +173,17 @@ void docker_shell(  string docker_image
 
         auto d1 = sp.spawnProcess(docker_args);            
         sp.wait(d1);
+}
+
+/** List all containers in a summarized way. */
+void docker_container_list()
+{
+        string[] docker_args = [  "docker", "ps", "-a"
+                                , "--format"
+                                , "\"table {{.ID}}\t{{.Names}}\t{{.Image}}\t{{.Status}}\""];
+
+        auto d1 = sp.spawnProcess(docker_args);            
+        sp.wait(d1);                                        
 }
 
 void docker_build(string image_name, string docker_file)
