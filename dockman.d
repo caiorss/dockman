@@ -5,6 +5,7 @@ import opt = std.getopt;
 import sf  = std.file;
 import std.conv;
 import std.algorithm;
+import std.array;
 
 /** Main function is the entry-point of a D-program */
 void main(string[] args) 
@@ -141,9 +142,11 @@ void docker_shell(  string docker_image
         docker_args ~= ["-v", wdir ~ ":/work"];
         // Set /work as current directory in container 
         docker_args ~= ["-w", "/work"];
-        
-        if(enable_verbose) io.writefln(" [TRACE] Mount %s to /uhome ", home);
-        if(enable_home) docker_args ~= ["-v", home ~ ":/uhome"];
+                
+        if(enable_home) {
+                if(enable_verbose) io.writefln(" [TRACE] Mount %s to /uhome ", home);
+                docker_args ~= ["-v", home ~ ":/uhome"];
+        }
 
         if(enable_x11) {
                 if(enable_verbose) io.writefln(" [TRACE] Enable X11 - graphical user interfaces ");
@@ -167,7 +170,7 @@ void docker_shell(  string docker_image
         
         docker_args ~= [ docker_image ];
 
-        if(command != null) docker_args ~= [ command ];
+        if(command != null) docker_args ~= command.split(" ");
 
         if(enable_verbose) io.writeln(" Docker command run: \n ", docker_args);
 
