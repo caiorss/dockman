@@ -106,10 +106,236 @@ Build dockman.d with the Docker container shell.
 
 #+END_SRC
 
+*** Docker image with Julia Language and chart plotting (X11 GUI Forwarding)
+
+ *Example A:*
+
+The following command runs the docker image
+docker.io/terasakisatoshi/myjulia' which contains a [[https://en.wikipedia.org/wiki/Julia_(programming_language)][Julia language]] 
+REPL with PyPlot and Plots plotting packages. The (-x) command line
+switch, equivlant to (--x11) enables X11 forwarding which allows
+running GUI graphical user interface applications such as chart
+pannels, IDEs and so on.
+
+#+BEGIN_SRC julia 
+  $ ./dockman.bin shell docker.io/terasakisatoshi/myjulia -x 
+                 _
+     _       _ _(_)_     |  Documentation: https://docs.julialang.org
+    (_)     | (_) (_)    |
+     _ _   _| |_  __ _   |  Type "?" for help, "]?" for Pkg help.
+    | | | | | | |/ _` |  |
+    | | |_| | | | (_| |  |  Version 1.1.0 (2019-01-21)
+   _/ |\__'_|_|_|\__'_|  |  Official https://julialang.org/ release
+  |__/                   |
+
+   julia> x = 0:2:10
+   0:2:10
+
+   julia> y = @. x^2 - 4x + 10
+   6-element Array{Int64,1}:
+    10
+     6
+    10
+    22
+    42
+    70
+
+   julia> import PyPlot; plt = PyPlot;
+
+   julia> plt.plot(x, y)
+   QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-root'
+   libGL error: MESA-LOADER: failed to retrieve device information
+   libGL error: unable to load driver: i915_dri.so
+   libGL error: driver pointer missing
+   libGL error: failed to load driver: i915
+   libGL error: failed to open drm device: No such file or directory
+   libGL error: failed to load driver: i965
+   libGL error: unable to load driver: swrast_dri.so
+   libGL error: failed to load driver: swrast
+   1-element Array{PyCall.PyObject,1}:
+    PyObject <matplotlib.lines.Line2D object at 0x7f6768fe5278>
+
+  julia> readdir()
+  8-element Array{String,1}:
+   ".git"       
+   ".gitignore" 
+   "Makefile"   
+   "README.org" 
+   "dockman.bin"
+   "dockman.d"  
+   "dockman.elf"
+   "dockman.o"
+#+END_SRC
+
+ *Example B:* 
+
+Run previous command with flag (--verbose) for debugging purposes and
+working directory, which the default value is the current directory,
+set to '/etc' directory of host machine.
+
+#+BEGIN_SRC sh 
+   $ ./dockman.bin shell docker.io/terasakisatoshi/myjulia -x -w=/etc --verbose 
+    [TRACE] Mount /etc to /work 
+    [TRACE] Enable X11 - graphical user interfaces 
+    Docker command run: 
+    ["docker", "run", "-it", "--rm", "-v", "/etc:/work", "-w", "/work", "-e", "DISPLAY", "-v", "/tmp/.X11-unix:/tmp/.X11-unix", "-v", "/home/archbox/.Xauthority:/root/.Xauthority", "docker.io/terasakisatoshi/myjulia"]
+                  _
+      _       _ _(_)_     |  Documentation: https://docs.julialang.org
+     (_)     | (_) (_)    |
+      _ _   _| |_  __ _   |  Type "?" for help, "]?" for Pkg help.
+     | | | | | | |/ _` |  |
+     | | |_| | | | (_| |  |  Version 1.1.0 (2019-01-21)
+    _/ |\__'_|_|_|\__'_|  |  Official https://julialang.org/ release
+   |__/                   |
+
+   julia> readdir()
+   357-element Array{String,1}:
+    ".java"                  
+    ".pwd.lock"              
+    ".updated"               
+    "DIR_COLORS"             
+    "DIR_COLORS.256color"    
+    "DIR_COLORS.lightbgcolor"
+    "GREP_COLORS"            
+    "ImageMagick-6"          
+    "NetworkManager"         
+    ⋮                        
+    "yum"                    
+    "yum.repos.d"            
+    "zfs-fuse"               
+    "zlogin"                 
+    "zlogout"                
+    "zprofile"               
+    "zshenv"                 
+    "zshrc"                  
+
+#+END_SRC
+
+*** Docke image for compiling and running TypeScript 
+
+This example uses the following alpine-based Docker image for
+compiling and running typescript [[https://hub.docker.com/r/sandrokeil/typescript][sandrokeil/typescript]] (source code:
+[[https://github.com/sandrokeil/docker-files/blob/master/typescript/Dockerfile][typescript/Dockerfile]]). This Docker image contains pre-installed
+NodeJS, npm and TSC - typescript compiler.
+
+
+ + File: test.ts  - Typescript source to be compiled. 
+
+#+BEGIN_SRC cpp
+   class MetaObject{
+         constructor (public Name: string){ }
+   }
+
+   let obj1 = new MetaObject("Something");
+   let obj2 = new MetaObject("Else");
+
+   console.log(" =>> Hello world typescript ");
+   console.log(`\t Obj = ${obj1.Name} `);
+
+   for (let j of  [10, 9, 100, 52]){
+     console.log(`j = ${j}`);
+   }
+#+END_SRC
+
+
+  *Compile typescript with docker image in interactive mode*
+
+ + Note: It is assumed that the file 'test.ts' is in the current directory.
+ + '-e=sh', equivalent to '--entrypoint=sh' changes the current
+   container entrypoint. 
+
+#+BEGIN_SRC sh 
+  $ dockman shell sandrokeil/typescript -e=sh
+  /work $ 
+  /work $ ls
+  test.ts
+#+END_SRC
+
+Compile and check generated files: 
+
+#+BEGIN_SRC sh 
+  # Compile to Javascript =>> Generates test.js
+  /work $ tsc test.ts 
+
+  # Check generated files 
+  /work $ ls
+  test.js  test.ts
+
+  # Show content of compiled javascript "Object-code"
+  /work $ cat test.js
+
+  var MetaObject = /** @class */ (function () {
+      function MetaObject(Name) {
+          this.Name = Name;
+      }
+      return MetaObject;
+  }());
+  var obj1 = new MetaObject("Something");
+  var obj2 = new MetaObject("Else");
+  console.log(" =>> Hello world typescript ");
+  console.log("\t Obj = " + obj1.Name + " ");
+  for (var _i = 0, _a = [10, 9, 100, 52]; _i < _a.length; _i++) {
+      var j = _a[_i];
+      console.log("j = " + j);
+  }
+#+END_SRC
+
+Run compiled typescript: 
+
+#+BEGIN_SRC sh 
+  /work $ node test.js
+
+   =>> Hello world typescript 
+           Obj = Something 
+  j = 10
+  j = 9
+  j = 100
+  j = 52
+#+END_SRC
+
+ *Compile typescript with docker image in batch mode*
+
+Compilation: generates test.js 
+
+#+BEGIN_SRC sh 
+  $ dockman shell sandrokeil/typescript -c="tsc test.ts"
+#+END_SRC
+
+Running with nodeJS: 
+
+#+BEGIN_SRC sh 
+  $ dockman shell sandrokeil/typescript -c="node test.js"
+   =>> Hello world typescript 
+           Obj = Something 
+  j = 10
+  j = 9
+  j = 100
+  j = 52
+#+END_SRC
+
+Running with nodeJS: (Show docker command line swiches in verbose mode)
+
+#+BEGIN_SRC sh 
+  $ dockman shell sandrokeil/typescript -c="node test.js" --verbose
+
+   [TRACE] Mount /home/archbox/Documents/projects/dockman.dlang/test to /work 
+   Docker command run: 
+   ["docker", "run", "-it", "--rm", "-v", "/home/user/test:/work", "-w", "/work", "sandrokeil/typescript", "node", "test.js"]
+
+   =>> Hello world typescript 
+           Obj = Something 
+  j = 10
+  j = 9
+  j = 100
+  j = 52
+#+END_SRC
+
 ** Building Instructions
 
 Dockman is written in [[https://en.wikipedia.org/wiki/D_(programming_language)][D programming language]] and has the following
 compilation options: 
+
+ *Building* 
 
  + Option 1:
    + Compilation with system-installed *DMD* (D-Language compiler). 
@@ -133,3 +359,20 @@ compilation options:
   # Show help 
   $ ./dockman.bin --help
 #+END_SRC
+
+ *Installing* 
+
+The binary can become accessible from command line from any directory,
+if it is placed in any folder listed in $PATH variable, for instance
+/bin or /usr/bin.
+
+Another way to install locally without root access is to use the
+following commands:
+
+#+BEGIN_SRC sh 
+  $ make build1 
+  $ mkdir -p ~/bin && cp dockman.bin ~/bin/dockman 
+  # Add ~/bin directory to ~/.bashrc 
+  $ echo "export PATH=$$PATH:~/bin" >> ~/.bashrc 
+#+END_SRC
+
