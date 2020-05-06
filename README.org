@@ -17,32 +17,35 @@ the current GCC installation.
 *** Show help
 
 #+BEGIN_SRC sh 
-  $ ./dockman.bin --help
+   $ dockman --help 
+    dockman - Docker Manager Tool
 
-   dockman - Docker Manager Tool
+   Usage: $ dockman <SUBCOMMAND> <DOCKER-IMAGE> [<OPTIONS>...]
 
-  Usage: $ dockman <SUBCOMMAND> <DOCKER-IMAGE> [<OPTIONS>...]
+    => Run docker-image unix shell (REPL) or any other entrypoint.
+     $ dockman shell <DOCKER-IMAGE> [<OPTIONS>...] 
+     $ dockman sh <DOCKER-IMAGE> [<OPTIONS>...] 
 
-   => Run docker-image unix shell (REPL) or any other entrypoint.
-   $ dockman shell <DOCKER-IMAGE> [<OPTIONS>...] 
+    => Run docker-image as service (aka daemon) 
+     $ dockman serive <DOCKER-IMAGE> [<OPTIONS>...] 
+     $ dockman sr <DOCKER-IMAGE> [<OPTIONS>...] 
 
-   => Run docker-image as daemon (aka service) 
-   $ dockman daemon <DOCKER-IMAGE> [<OPTIONS>...] 
+    => Build docker image from file 
+    $ dockman build <DOCKER-IMAGE=-NAME> <DOCKER-FILE>
 
-   => Build docker image from file 
-   $ dockman build <DOCKER-IMAGE=-NAME> <DOCKER-FILE>
+    Options:
+         --verbose Log docker commands for debugging.
+   -w    --workdir Working directory, default current directory of host.
+   -n       --name Human-readable name for container.
+   -c    --command Command to be executed by image entrypoint
+   -e --entrypoint Alternative entrypoint.
+   -x        --x11 Enable X11 GUI graphical user interface
+   -u       --user Alternative user.
+   -m       --home Mount $HOME directory to /uhome dir. in container.
+   -v     --volume Volume to be mounted.
+   -p       --port Host port to be mapped to container.
+   -h       --help This help information.
 
-   Options:
-        --verbose Log docker commands for debugging.
-  -w    --workdir Working directory, default current directory of host.
-  -n       --name Human-readable name for container.
-  -c    --command Command to be executed by image entrypoint
-  -e --entrypoint Alternative entrypoint.
-  -x        --x11 Enable X11 GUI graphical user interface
-  -u       --user Alternative user.
-  -m       --home Mount $HOME directory to /uhome dir. in container.
-  -v     --volume Volume to be mounted.
-  -h       --help This help information.
 #+END_SRC
 
 *** Docker image for compiling and running TypeScript 
