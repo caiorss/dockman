@@ -25,6 +25,10 @@ void main(string[] args)
 
         opt.GetoptResult opt_result;
 
+        // string arg_copy = new string[](args.length);
+        auto cmd_args = parse_remaining_args(args);
+        // io.writeln(" [TRACE] cmd_args = ", cmd_args);
+
         try {
                 opt_result = opt.getopt(
                                 args
@@ -61,6 +65,8 @@ void main(string[] args)
                         // Exit main() function 
                         return; 
                 }
+
+                // io.writeln(" [TRACE] => args = ", args);
                 
                 if(args[1] == "container-list" || args[1] == "cl")
                 {
@@ -77,9 +83,9 @@ void main(string[] args)
                 }
 
                 if(args[1] == "shell")  
-                        docker_shell( args[2], workdir, entrypoint, command, user, name
-                                        , home, x11, verbose, false, false, volumes, ports);        
-                
+                        docker_shell( args[2], workdir, entrypoint, command = join(cmd_args, " "), user, name
+                                        , home, x11, verbose, false, false, volumes, ports);                      
+
                 if(args[1] == "daemon"){ 
                         bool flag_dont_remove_container = name != null;
                         docker_shell( args[2], workdir, entrypoint, command, user, name
@@ -101,6 +107,21 @@ void main(string[] args)
         }        
 
 } // ------ End of main() ------------- //
+
+string[] parse_remaining_args(string[] args)
+{        
+        int i = 0;
+        foreach (string k; args)
+        {       
+                if(k == "--") break;
+                i++;
+        }
+        if(i + 1 > args.length) return [];
+        auto cp = new string[](args.length - i - 1);
+        cp[0..$] = args[(i + 1)..$];
+        assert(&cp[0] != &args[i + 1]);
+        return cp;
+}
 
 void docker_shell(  string docker_image
                       , string workdir      = null 
