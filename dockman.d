@@ -8,18 +8,32 @@ import std.algorithm;
 import std.array;
 
 struct DockerOptions {
+        // Docker image to be run
         string   docker_image = null;
-        int      flags      = 0;   
+        // Enable verbosity and demonstrate all docker commands
         bool     verbose    = false;
+        // Mount user $HOM directory to /uhome directory
         bool     home       = false;
-        bool     x11        = false;     
-        bool     detach     = false;        
+        // Enable X11 forwarding for GUI - Graphical
+        bool     x11        = false;
+        // Detach container (run as service or daemon)
+        bool     detach     = false;
+        // Remove container if true
+        bool     remove     = true;
+        // Alternative container's entrypoint
         string   entrypoint = null;
+        // Command to be run
         string   command    = null;
         string   user       = null;
+        // Container label (name)
         string   name       = null;
+        // Directory of host machine to be mounted to /work
+        // Initial current working directory of cotainer.
+        // The default value is the current directory of host machine.
         string   workdir    = null; 
+        // List of volumes to be mounted.
         string[] volumes    = null;
+        // Ports to be shared.
         string[] ports      = null;
 }
 
