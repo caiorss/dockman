@@ -133,13 +133,13 @@ Run compiled typescript:
 Compilation: generates test.js 
 
 #+BEGIN_SRC sh 
-  $ dockman shell sandrokeil/typescript -c="tsc typescript_example.ts"
+  $ dockman shell sandrokeil/typescript -- tsc typescript_example.ts
 #+END_SRC
 
 Running with nodeJS: 
 
 #+BEGIN_SRC sh 
-  $ dockman shell sandrokeil/typescript -c="node typescript_example.js"
+  $ dockman shell sandrokeil/typescript -- node typescript_example.js
    =>> Hello world typescript 
            Obj = Something 
   j = 10
@@ -265,6 +265,138 @@ Run the same Julia docker image with a different entry-point, now
   $ dockman shell docker.io/terasakisatoshi/myjulia -x --entrypoint=bash
   root@932dc38e9107:/work# 
   root@932dc38e9107:/work# exit
+#+END_SRC
+
+ *Example D* 
+
+Run Julia script in batch mode: 
+
+  + Note: this script plots a chart in a new window with PyPlot
+    (Matplotlib Python library).
+  + (-x) flag, equivalent to --x11, enables X11 forwarding or running
+    GUI applications.
+
+#+BEGIN_SRC sh 
+  $ dockman shell docker.io/terasakisatoshi/myjulia -x -- julia -i julia_lang_script.jl
+#+END_SRC
+
+File: julia_lang_script.jl
+
+#+BEGIN_SRC python 
+  import PyPlot; plt = PyPlot;
+
+  x = 0:2:10
+  y = @. x^2 - 4x + 10
+
+  println(" x = ", collect(x)')
+  println(" y = ", y')
+
+  plt.plot(x, y)
+#+END_SRC
+
+*** Docker image with Rust and GCC/MingGW compiler 
+
+Example: compile a sample rust source code using the Docker image [[https://hub.docker.com/_/rust][rust]]
+official Docker image.
+
+Source code: *rust_example.rs*
+
+#+BEGIN_SRC rust 
+  // Rust compiler testing ....                                                                      
+  fn main(){
+     println!(" [TRACE] Hello world RUST programming language.");
+
+     let x = 5 + /* 90 + */ 5;
+     println!("Is `x` 10 or 100? x = {}", x);
+
+     for n in 1..10 { println!(" n = {}", n); }
+  }
+#+END_SRC
+
+1. Enter the directory: 
+
+#+BEGIN_SRC sh 
+ $ cd test_code/
+#+END_SRC
+
+2. Run: 
+
+#+BEGIN_SRC sh 
+  root@60391179c521:/work# rustc rust_example.rs -o app.bin
+
+  root@60391179c521:/work# ./app.bin 
+   [TRACE] Hello world RUST programming language.
+  Is `x` 10 or 100? x = 10
+   n = 1
+   n = 2
+   n = 3
+   n = 4
+   n = 5
+   n = 6
+   n = 7
+   n = 8
+   n = 9
+#+END_SRC
+
+3. Build windows 64 bits executable: 
+
+#+BEGIN_SRC sh  
+  $ apt-get update && apt-get install mingw-w64
+  $ rustup target add x86_64-pc-windows-gnu
+
+  # Build 
+  $ rustc rust_example.rs -o main.exe --target x86_64-pc-windows-gnu
+
+  # Check file 
+  $ file main.exe 
+  main.exe: PE32+ executable (console) x86-64, for MS Windows
+
+  # Run Windows executable with wine. 
+   root@32cd56482af1:/work# wine main.exe 
+   it looks like wine32 is missing, you should install it.
+   multiarch needs to be enabled first.  as root, please
+   execute "dpkg --add-architecture i386 && apt-get update &&
+   apt-get install wine32"
+    [TRACE] Hello world RUST programming language.
+   Is `x` 10 or 100? x = 10
+    n = 1
+    n = 2
+    n = 3
+    n = 4
+    n = 5
+    n = 6
+    n = 7
+    n = 8
+    n = 9
+   root@32cd56482af1:/work# 
+#+END_SRC
+
+4. Build in batch mode (without entering bash shell script REPL): 
+
+#+BEGIN_SRC sh 
+  $ dockman shell rust -- rustc rust_example.rs --verbose -o app2.bin
+
+  $ dockman shell rust --verbose -- rustc rust_example.rs --verbose -o app2.bin
+   [TRACE] Mount /home/archbox/Documents/projects/dockman.dlang/test_code to /work 
+   Docker command run: 
+   ["docker", "run", "-it", "--rm", "-v", "/home/user/test_code:/work", "-w", "/work", "rust", "rustc", "rust_example.rs", "--verbose", "-o", "app2.bin"]
+
+  $ file app2.bin 
+  app.bin: ELF 64-bit LSB shared object, x86-64, ... ... ... .. 
+
+  $ ./app2.bin 
+   [TRACE] Hello world RUST programming language.
+  Is `x` 10 or 100? x = 10
+   n = 1
+   n = 2
+   n = 3
+   n = 4
+   n = 5
+   n = 6
+   n = 7
+   n = 8
+   n = 9
+
 #+END_SRC
 
 *** Docker image with C++ CERN's Root CLing REPL 
@@ -413,91 +545,6 @@ Force stopping and deleting container
 
 #+BEGIN_SRC sh 
   $ docker rm -f jupyter-cpp-server
-#+END_SRC
-*** Docker image with Rust and GCC/MingGW compiler 
-
-Example: compile a sample rust source code using the Docker image [[https://hub.docker.com/_/rust][rust]]
-official Docker image.
-
-1. Enter the directory: 
-
-#+BEGIN_SRC sh 
- $ cd test_code/
-#+END_SRC
-
-2. Run: 
-
-#+BEGIN_SRC sh 
-  root@60391179c521:/work# rustc rust_example.rs -o app.bin
-
-  root@60391179c521:/work# ./app.bin 
-   [TRACE] Hello world RUST programming language.
-  Is `x` 10 or 100? x = 10
-   n = 1
-   n = 2
-   n = 3
-   n = 4
-   n = 5
-   n = 6
-   n = 7
-   n = 8
-   n = 9
-#+END_SRC
-
-3. Build windows 64 bits executable: 
-
-#+BEGIN_SRC sh  
-  $ apt-get update && apt-get install mingw-w64
-  $ rustup target add x86_64-pc-windows-gnu
-
-  # Build 
-  $ rustc rust_example.rs -o main.exe --target x86_64-pc-windows-gnu
-
-  # Check file 
-  $ file main.exe 
-  main.exe: PE32+ executable (console) x86-64, for MS Windows
-
-  # Run Windows executable with wine. 
-   root@32cd56482af1:/work# wine main.exe 
-   it looks like wine32 is missing, you should install it.
-   multiarch needs to be enabled first.  as root, please
-   execute "dpkg --add-architecture i386 && apt-get update &&
-   apt-get install wine32"
-    [TRACE] Hello world RUST programming language.
-   Is `x` 10 or 100? x = 10
-    n = 1
-    n = 2
-    n = 3
-    n = 4
-    n = 5
-    n = 6
-    n = 7
-    n = 8
-    n = 9
-   root@32cd56482af1:/work# 
-#+END_SRC
-
-4. Build in batch mode (without entering bash shell script REPL): 
-
-#+BEGIN_SRC sh 
-  $ dockman shell rust -c="rustc rust_example.rs --verbose -o app2.bin"
-
-  $ file app2.bin 
-  app.bin: ELF 64-bit LSB shared object, x86-64, ... ... ... .. 
-#+END_SRC
-
-Source code: *rust_example.rs*
-
-#+BEGIN_SRC rust 
-  // Rust compiler testing ....                                                                      
-  fn main(){
-     println!(" [TRACE] Hello world RUST programming language.");
-
-     let x = 5 + /* 90 + */ 5;
-     println!("Is `x` 10 or 100? x = {}", x);
-
-     for n in 1..10 { println!(" n = {}", n); }
-  }
 #+END_SRC
 
 *** Running shell (bash) in a docker-image with D-Language compiler
