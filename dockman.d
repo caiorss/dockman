@@ -117,11 +117,14 @@ void main(string[] args)
                         return;
                 }
 
-                if(args[1] == "shell")  
+                // Run docker container in interactive mode (tty) or batch mode
+                if(args[1] == "shell" || args[1] == "sh")
                         docker_shell( &dopts );                      
 
-                if(args[1] == "daemon"){ 
-                        bool flag_dont_remove_container = name != null;
+                // Run docker container as service (daemon)
+                if(args[1] == "service" || args[1] == "sr"){
+                        dopts.detach = true;
+                        dopts.remove = dopts.name != null;
                         docker_shell( &dopts );        
                 }
                 
