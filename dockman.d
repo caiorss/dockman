@@ -7,22 +7,6 @@ import std.conv;
 import std.algorithm;
 import std.array;
 
-enum OptionFlags {
-        // (bit 0) Enable verbose - Show docker commands 
-        verbose = 1 << 0,
-        // (bit 1) Mount user $HOME directory to /uhome directory in container 
-        home    = 1 << 1,
-        // (bit 2) Enable X11 forwarding for displaying GUI applications 
-        x11     = 1 << 2,
-        // (bit 3) Ennable ptrace capability 
-        ptrace  = 1 << 3,
-}
-
-bool get_bit_from_flags(int flags, int bit)
-{
-        return ((flags >> bit) & 1) == 1;
-}
-
 struct DockerOptions {
         string   docker_image = null;
         int      flags      = 0;   
