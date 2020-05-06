@@ -157,17 +157,17 @@ string[] parse_remaining_args(string[] args)
 
 void docker_shell(DockerOptions* dpt)
 {
-        auto docker_args = ["docker", "run", "-it", "--rm"]; 
+        auto docker_args = ["docker", "run", "-it"];
 
         // Get current directory 
         string cwd = sf.getcwd();
         // Get home directory 
         string home = sp.environment.get("HOME");
 
-        //if( !dont_remove_container ) docker_args ~= ["--rm"];
+        if( dpt.remove ) docker_args ~= ["--rm"];
 
         
-        // if(dpt.enable_daemon) docker_args ~= ["--detach"];
+        if(dpt.detach) docker_args ~= ["--detach"];
 
         if(dpt.user != null){
                 // if(enable_verbose) io.writefln(" [TRACE] User changed to: '%s'", user);
@@ -220,7 +220,6 @@ void docker_shell(DockerOptions* dpt)
         docker_args ~= [ dpt.docker_image ];
 
         if(dpt.command != null) docker_args ~= dpt.command.split(" ");
-
         if(dpt.verbose) io.writeln(" Docker command run: \n ", docker_args);
 
         auto d1 = sp.spawnProcess(docker_args);            
