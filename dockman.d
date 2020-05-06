@@ -84,13 +84,15 @@ void main(string[] args)
                         io.writeln("Usage: $ dockman <SUBCOMMAND> <DOCKER-IMAGE> [<OPTIONS>...]");
                         
                         io.writeln("\n => Run docker-image unix shell (REPL) or any other entrypoint.");
-                        io.writeln(" $ dockman shell <DOCKER-IMAGE> [<OPTIONS>...] ");
+                        io.writeln("  $ dockman shell <DOCKER-IMAGE> [<OPTIONS>...] ");
+                        io.writeln("  $ dockman sh <DOCKER-IMAGE> [<OPTIONS>...] ");
                         
-                        io.writeln("\n => Run docker-image as daemon (aka service) ");
-                        io.writeln(" $ dockman daemon <DOCKER-IMAGE> [<OPTIONS>...] ");                        
+                        io.writeln("\n => Run docker-image as service (aka daemon) ");
+                        io.writeln("  $ dockman serive <DOCKER-IMAGE> [<OPTIONS>...] ");                        
+                        io.writeln("  $ dockman sr <DOCKER-IMAGE> [<OPTIONS>...] ");                        
 
                         io.writeln("\n => Build docker image from file ");
-                        io.writeln(" $ dockman build <DOCKER-IMAGE=-NAME> <DOCKER-FILE>");                        
+                        io.writeln("  $ dockman build <DOCKER-IMAGE=-NAME> <DOCKER-FILE>");                        
 
 
                         opt.defaultGetoptPrinter("\n Options:", opt_result.options);
