@@ -214,7 +214,13 @@ void docker_shell(DockerOptions* dpt)
         foreach (v; dpt.volumes)
         {                        
                 //assert(v.split(":").length != 2);
-                docker_args ~= ["-v", v];
+                string[] s = v.split(":");                
+                string src = s[0].replace("./",    cwd ~ "/")
+                                 .replace("{PWD}", cwd ~ "/")
+                                 .replace("~", home )
+                                 .replace("{HOME}", home );
+                // io.writeln(" [DEBUG] src = ", src , " v = ", v);
+                docker_args ~= ["-v", src ~ ":" ~ s[1] ];
         }
 
         foreach (p; dpt.ports)
