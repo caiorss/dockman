@@ -126,7 +126,7 @@ void main(string[] args)
                 // Run docker container as service (daemon)
                 if(args[1] == "service" || args[1] == "sr"){
                         dopts.detach = true;
-                        dopts.remove = dopts.name != null;
+                        dopts.remove = dopts.name == null;
                         docker_shell( &dopts );        
                 }
                 
