@@ -48,6 +48,79 @@ the current GCC installation.
 
 #+END_SRC
 
+*** Nginx web server docker image for serving static directories 
+
+Serve static content from a local directory with Nginx Web
+Server. After the following code is run, the server can be accessed
+through any web browser at URL http://localhost.
+
+#+BEGIN_SRC sh 
+  $ cd test_code 
+  
+   $ dockman service nginx -p=80:80 --name=nginx-http-server -v=~/projects:/srv -v=./nginx.conf:/etc/nginx/conf.d/default.conf
+   f4947564b5520d358e5708462b59e5369b7d3750b578c0666dfbe3baeff21114
+#+END_SRC
+
+Check container status: 
+
+#+BEGIN_SRC sh 
+  $ docker ps  | grep nginx-http
+  f4947564b552        nginx               "nginx -g 'daemon ..."   2 minutes ago       Up 2 minutes        0.0.0.0:80->80/tcp   nginx-http-server
+#+END_SRC
+
+Check container's logs.
+
+#+BEGIN_SRC sh 
+  $ docker logs nginx-http-server
+  172.17.0.1 - - [07/May/2020:00:21:02 +0000] "GET / HTTP/1.1" 200 6128 "-" "Mozilla/5.0 (X11; Fedora; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36" "-"
+  172.17.0.1 - - [07/May/2020:00:24:12 +0000] "GET /cppexperiments/ HTTP/1.1" 200 3122 "http://localhost/" "Mozilla/5.0 (X11; Fedora; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36" "-"
+#+END_SRC
+
+Watch container logs: 
+
+#+BEGIN_SRC sh 
+   $ docker logs -f nginx-http-server
+   172.17.0.1 - - [07/May/2020:00:21:02 +0000] "GET / HTTP/1.1" 200 6128 "-" "Mozilla/5.0 (X11; Fedora; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36" "-"
+   172.17.0.1 - - [07/May/2020:00:24:12 +0000] "GET /cppexperiments/ HTTP/1.1" 200 3122 "http://localhost/" "Mozilla/5.0 (X11; Fedora; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36" "-"
+
+   172.17.0.1 - - [07/May/2020:00:24:34 +0000] "GET /cppexperiments/CMakeLists.txt HTTP/1.1" 200 5601 "http://localhost/cppexperiments/" "Mozilla/5.0 (X11; Fedora; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36" "-"
+#+END_SRC
+
+Stop container: 
+
+#+BEGIN_SRC sh 
+ $ docker stop nginx-http-server
+#+END_SRC
+
+Start container: 
+
+#+BEGIN_SRC sh 
+ $ docker start nginx-http-server
+#+END_SRC
+
+Remove container: 
+
+#+BEGIN_SRC sh
+   $ docker rm -f nginx-http-server
+#+END_SRC
+
+File: nginx.conf 
+
+#+BEGIN_SRC sh 
+  server{
+          listen 80;
+          server_name _;
+
+          location / {	
+                  root /srv;
+                  # Activate the next line if you want to list files
+                  autoindex on;
+          }
+  }
+#+END_SRC
+
+
+
 *** Docker image for compiling and running TypeScript 
 
 This example uses the following alpine-based Docker image for
