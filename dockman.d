@@ -145,7 +145,7 @@ void main(string[] args)
                 if(args[1] == "build") {  docker_build(args[2], args[3]); }
 
                 if(args[1] == "volume-shell" || args[1] == "vs") {
-                        docker_volume_shell(args[2]);
+                        docker_volume_shell(args[2], cmd_args);
                 }
 
         } catch (opt.GetOptException) 
@@ -261,7 +261,7 @@ void docker_shell(DockerOptions* dpt)
   * and set the directory /volume as the current working directory. 
   * The current directory of host is mounted to /cwd directory in the container.
   */
-void docker_volume_shell(string named_volume)
+void docker_volume_shell(string named_volume, string[] command_args = [])
 {
         // Get current directory 
         string cwd = sf.getcwd();
@@ -285,6 +285,7 @@ void docker_volume_shell(string named_volume)
                                 ,"alpine"
                                 ];
         
+        docker_args = docker_args ~ command_args;        
         //io.writeln(" [TRACE] docker_args = ", docker_args);
 
         auto d1 = sp.spawnProcess(docker_args);                    
