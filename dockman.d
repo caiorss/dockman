@@ -6,6 +6,7 @@ import sf  = std.file;
 import std.conv;
 import std.algorithm;
 import std.array;
+import std.string;
 
 struct DockerOptions {
         // Docker image to be run
@@ -100,8 +101,11 @@ void main(string[] args)
                         io.writeln("  $ dockman sr <DOCKER-IMAGE> [<OPTIONS>...] ");                        
 
                         io.writeln("\n => Build docker image from file ");
-                        io.writeln("  $ dockman build <DOCKER-IMAGE=-NAME> <DOCKER-FILE>");                        
+                        io.writeln("  $ dockman build <DOCKER-IMAGE-NAME> <DOCKER-FILE>");                        
 
+                        io.writeln("\n => Open shell (bash) in a docker named-volume.");
+                        io.writeln("  $ dockman volume-shell <DOCKER-VOLUME-NAME>");                        
+                        io.writeln("  $ dockman vs <DOCKER-VOLUME-NAME>");                        
 
                         opt.defaultGetoptPrinter("\n Options:", opt_result.options);
                         // Exit main() function 
@@ -138,8 +142,11 @@ void main(string[] args)
                         docker_shell( &dopts );        
                 }
                 
-                if(args[1] == "build")
-                        docker_build(args[2], args[3]);                
+                if(args[1] == "build") {  docker_build(args[2], args[3]); }
+
+                if(args[1] == "volume-shell" || args[1] == "vs") {
+                        docker_volume_shell(args[2]);
+                }
 
         } catch (opt.GetOptException) 
         {
@@ -196,11 +203,11 @@ void docker_shell(DockerOptions* dpt)
         // Directory to be mounted to '/work' dir in container. 
         string wdir = dpt.workdir != null ? dpt.workdir : cwd;
 
-        if(dpt.verbose) io.writefln(" [TRACE] Mount %s to /work ", wdir);
+        if(dpt.verbose) io.writefln(" [TRACE] Mount %s to /cwd ", wdir);
         // Concatenate list 
-        docker_args ~= ["-v", wdir ~ ":/work"];
+        docker_args ~= ["-v", wdir ~ ":/cwd"];
         // Set /work as current directory in container 
-        docker_args ~= ["-w", "/work"];
+        docker_args ~= ["-w", "/cwd"];
                 
         if(dpt.home) {
                 if(dpt.verbose) io.writefln(" [TRACE] Mount %s to /uhome ", home);
@@ -248,6 +255,40 @@ void docker_shell(DockerOptions* dpt)
 
         auto d1 = sp.spawnProcess(docker_args);            
         sp.wait(d1);
+}
+
+/** Mount a named volume to a directory '/volume' in an alpine container 
+  * and set the directory /volume as the current working directory. 
+  * The current directory of host is mounted to /cwd directory in the container.
+  */
+void docker_volume_shell(string named_volume)
+{
+        // Get current directory 
+        string cwd = sf.getcwd();
+
+        string proc_read_stdout_line(string[] args) {
+                // Get host user's UID 
+                auto pipe = sp.pipeProcess(["id", "-u"], sp.Redirect.stdout);
+                sp.wait(pipe.pid);
+                return  std.string.strip(pipe.stdout.readln(), "\n");                
+        }
+
+        const string user_uid = proc_read_stdout_line(["id", "-u"]);
+        const string user_gid = proc_read_stdout_line(["id", "-u"]);             
+
+        string[] docker_args = [  "docker", "run", "--rm", "-it"
+                                , "-v", cwd ~ ":/cwd"
+                                , "-v", named_volume ~ ":/volume"
+                                , "-w", "/volume"
+                                , "--env", "HOST_UID=" ~ user_uid
+                                , "--env", "HOST_GID=" ~ user_gid
+                                ,"alpine"
+                                ];
+        
+        //io.writeln(" [TRACE] docker_args = ", docker_args);
+
+        auto d1 = sp.spawnProcess(docker_args);                    
+        sp.wait(d1);                                        
 }
 
 /** List all containers in a summarized way. */
