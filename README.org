@@ -62,37 +62,110 @@ following commands:
 *** Show help
 
 #+BEGIN_SRC sh 
-  $ ./dockman.bin 
-   dockman - Docker Manager Tool
+   $ dockman --help
+    dockman - Docker Manager Tool
 
-  Usage: $ dockman <SUBCOMMAND> <DOCKER-IMAGE> [<OPTIONS>...]
+   Usage: $ dockman <SUBCOMMAND> <DOCKER-IMAGE> [<OPTIONS>...]
 
-   => Run docker-image unix shell (REPL) or any other entrypoint.
-    $ dockman shell <DOCKER-IMAGE> [<OPTIONS>...] 
-    $ dockman sh <DOCKER-IMAGE> [<OPTIONS>...] 
+    => Run docker-image unix shell (REPL) or any other entrypoint.
+     $ dockman shell <DOCKER-IMAGE> [<OPTIONS>...] 
+     $ dockman sh <DOCKER-IMAGE> [<OPTIONS>...] 
 
-   => Run docker-image as service (aka daemon) 
-    $ dockman serive <DOCKER-IMAGE> [<OPTIONS>...] 
-    $ dockman sr <DOCKER-IMAGE> [<OPTIONS>...] 
+    => Run docker-image as service (aka daemon) 
+     $ dockman serive <DOCKER-IMAGE> [<OPTIONS>...] 
+     $ dockman sr <DOCKER-IMAGE> [<OPTIONS>...] 
 
-   => Build docker image from file 
-    $ dockman build <DOCKER-IMAGE=-NAME> <DOCKER-FILE>
+    => Build docker image from file 
+     $ dockman build <DOCKER-IMAGE-NAME> <DOCKER-FILE>
 
-   Options:
-         --verbose Log docker commands for debugging.
-   -w    --workdir Working directory, default current directory of host.
-   -n       --name Human-readable name for container.
-   -c    --command Command to be executed by image entrypoint
-   -e --entrypoint Alternative entrypoint.
-   -x        --x11 Enable X11 GUI graphical user interface
-   -u       --user Alternative user.
-   -m       --home Mount $HOME directory to /uhome dir. in container.
-   -v     --volume Volume to be mounted.
-   -p       --port Host port to be mapped to container.
-  -pr --privileged Enable privileged mode, useful for GDB
-   -g        --gdb Enable GDB (GNU Debugger) and PTrace inside docker containers.
-   -h       --help This help information.
-#+END_SRC  
+    => Open shell (bash) in a docker named-volume.
+     $ dockman volume-shell <DOCKER-VOLUME-NAME>
+     $ dockman vs <DOCKER-VOLUME-NAME>
+
+    Options:
+          --verbose Log docker commands for debugging.
+    -w    --workdir Working directory, default current directory of host.
+    -n       --name Human-readable name for container.
+    -c    --command Command to be executed by image entrypoint
+    -e --entrypoint Alternative entrypoint.
+    -x        --x11 Enable X11 GUI graphical user interface
+    -u       --user Alternative user.
+    -m       --home Mount $HOME directory to /uhome dir. in container.
+    -v     --volume Volume to be mounted.
+    -p       --port Host port to be mapped to container.
+   -pr --privileged Enable privileged mode, useful for GDB
+    -g        --gdb Enable GDB (GNU Debugger) and PTrace inside docker containers.
+    -h       --help This help information.
+#+END_SRC
+
+*** Open a shell in a Docker named-volume 
+
+This command opens a shell (bash) REPL in a Docker volume. It mounts
+the volume to the default directory '/volume' in the container and
+mounts the current working directory in the host to '/cwd' in the
+container. It makes easier for manipulating the container data or
+transferring data from container to a host directory and vice versa.
+
+Example: List volumes.
+
+#+BEGIN_SRC sh
+  $ docker volume ls
+  DRIVER              VOLUME NAME
+  local               alpine
+  local               myvolume
+  local               myvolyme
+  local               nginx.conf
+  local               pdev-dlang
+#+END_SRC
+
+List volume contents: 
+
+#+BEGIN_SRC sh 
+   # Get current directory in container. 
+   $ dockman volume-shell pdev-dlang -- pwd
+  /volume
+
+   # List contents of pdev-dlang volume 
+   $ dockman volume-shell pdev-dlang -- ls -a 
+   .              .bash_logout   .config        .local         .vscode
+   ..             .bashrc        .dub           .pki           dlang
+   .bash_history  .cache         .gnupg         .profile       file.txt
+
+   $ dockman volume-shell pdev-dlang -- ls dlang
+   d-keyring.gpg  dmd-2.091.1    install.sh
+#+END_SRC
+
+List contents of /cwd (directory which the current working directory
+of local machine is mounted.)
+
+#+BEGIN_SRC sh 
+  # Within host machine 
+  $ ls
+  test_code/            dockman.bin*  dockman-linux-x86_64-elf.bin*  Makefile
+  test_codenginx.conf/  dockman.d     dockman.o                      README.org
+
+  # Within docker container 
+  $ dockman volume-shell pdev-dlang -- ls /cwd
+  Makefile                      dockman.d
+  README.org                    dockman.o
+  dockman-linux-x86_64-elf.bin  test_code
+  dockman.bin                   test_codenginx.conf
+
+#+END_SRC
+
+Open shell in a Docker volume. 
+
+#+BEGIN_SRC  
+  $ dockman volume-shell pdev-dlang 
+  /volume # ls 
+  dlang     file.txt
+
+  /volume # cat file.txt
+  My text here
+
+  /volume # ls dlang
+  d-keyring.gpg  dmd-2.091.1    install.sh
+#+END_SRC
 
 *** Nginx web server docker image for serving static directories 
 
