@@ -13,7 +13,52 @@ the risk of currently installed toolchain. For instance, it is far
 easier and faster to run a new GCC (GNU C) compiler version from a
 container than installing it on the current machine risking breaking
 the current GCC installation. 
-** Examples 
+
+** Building Instructions
+
+Dockman is written in [[https://en.wikipedia.org/wiki/D_(programming_language)][D programming language]] and has the following
+compilation options: 
+
+ *Building* 
+
+ + Option 1:
+   + Compilation with system-installed *DMD* (D-Language compiler). 
+
+#+BEGIN_SRC sh 
+  $ make build1 
+
+  # Show help 
+  $ ./dockman.bin --help
+#+END_SRC
+
+ + Option 2: Compilation using the _Docker image_
+   + The advantage of this option is that the D-language tooling doesn't
+     need to be installed in the system as the toolchain is provided
+     by the docker image: [[https://github.com/dlangchina/docker-dlang][dlangchina/docker-dlang]]. 
+
+#+BEGIN_SRC sh 
+  $ make build2 
+
+  # Show help 
+  $ ./dockman.bin --help
+#+END_SRC
+
+ *Installing* 
+
+The binary can become accessible from command line from any directory,
+if it is placed in any folder listed in $PATH variable, for instance
+/bin or /usr/bin.
+
+Another way to install locally without root access is to use the
+following commands:
+
+#+BEGIN_SRC sh 
+  $ make build1 
+  $ mkdir -p ~/bin && cp dockman.bin ~/bin/dockman 
+  # Add ~/bin directory to ~/.bashrc 
+  $ echo "export PATH=$$PATH:~/bin" >> ~/.bashrc 
+#+END_SRC
+** Examples and Use-cases 
 *** Show help
 
 #+BEGIN_SRC sh 
@@ -119,7 +164,6 @@ File: nginx.conf
           }
   }
 #+END_SRC
-
 
 *** Docker image for compiling and running TypeScript 
 
@@ -683,51 +727,5 @@ Build dockman.d with the Docker container shell.
   ... ... ... ... ... ... ... ... ... ... ... ... 
   ... ... ... ... ... ... ... ... ... ... ... ... 
 
-#+END_SRC
-
-** Building Instructions
-
-Dockman is written in [[https://en.wikipedia.org/wiki/D_(programming_language)][D programming language]] and has the following
-compilation options: 
-
- *Building* 
-
- + Option 1:
-   + Compilation with system-installed *DMD* (D-Language compiler). 
-
-#+BEGIN_SRC sh 
-  $ make build1 
-
-  # Show help 
-  $ ./dockman.bin --help
-#+END_SRC
-
- + Option 2: Compilation using the Docker image
-   + The advantage of this option is that the D-language tooling don't
-     need to be installed in the system as the toolings are provided
-     by docker image [[https://github.com/dlangchina/docker-dlang][dlangchina/docker-dlang]]. It only needs a _docker_
-     instalation. 
-
-#+BEGIN_SRC sh 
-  $ make build2 
-
-  # Show help 
-  $ ./dockman.bin --help
-#+END_SRC
-
- *Installing* 
-
-The binary can become accessible from command line from any directory,
-if it is placed in any folder listed in $PATH variable, for instance
-/bin or /usr/bin.
-
-Another way to install locally without root access is to use the
-following commands:
-
-#+BEGIN_SRC sh 
-  $ make build1 
-  $ mkdir -p ~/bin && cp dockman.bin ~/bin/dockman 
-  # Add ~/bin directory to ~/.bashrc 
-  $ echo "export PATH=$$PATH:~/bin" >> ~/.bashrc 
 #+END_SRC
 
