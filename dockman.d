@@ -10,16 +10,6 @@ import std.array;
 struct DockerOptions {
         // Docker image to be run
         string   docker_image = null;
-        // Enable verbosity and demonstrate all docker commands
-        bool     verbose    = false;
-        // Mount user $HOM directory to /uhome directory
-        bool     home       = false;
-        // Enable X11 forwarding for GUI - Graphical
-        bool     x11        = false;
-        // Detach container (run as service or daemon)
-        bool     detach     = false;
-        // Remove container if true
-        bool     remove     = true;
         // Alternative container's entrypoint
         string   entrypoint = null;
         // Command to be run
@@ -35,6 +25,22 @@ struct DockerOptions {
         string[] volumes    = null;
         // Ports to be shared.
         string[] ports      = null;
+
+        //------ Flags ----------//
+        // Enable verbosity and demonstrate all docker commands
+        bool     verbose    = false;
+        // Mount user $HOM directory to /uhome directory
+        bool     home       = false;
+        // Enable X11 forwarding for GUI - Graphical
+        bool     x11        = false;
+        // Detach container (run as service or daemon)
+        bool     detach     = false;
+        // Remove container if true
+        bool     remove     = true;
+        // Enable privileged mode (useful for GDB)
+        bool     privileged = false;
+        // Enable GDB (GNU Debugger) usage in Docker containers. 
+        bool     gdb        = false;
 }
 
 /** Main function is the entry-point of a D-program */
@@ -64,16 +70,18 @@ void main(string[] args)
         try {
                 opt_result = opt.getopt(
                                 args
-                                ,"verbose",      "Log docker commands for debugging.", &dopts.verbose
-                                ,"w|workdir",    "Working directory, default current directory of host.", &workdir
-                                ,"n|name",       "Human-readable name for container." ,&dopts.name
-                                ,"c|command",    "Command to be executed by image entrypoint", &dopts.command
-                                ,"e|entrypoint", "Alternative entrypoint.", &dopts.entrypoint
-                                ,"x|x11",        "Enable X11 GUI graphical user interface", &dopts.x11
-                                ,"u|user",       "Alternative user.", &dopts.user
-                                ,"m|home",       "Mount $HOME directory to /uhome dir. in container." ,&dopts.home
-                                ,"v|volume",     "Volume to be mounted.", &dopts.volumes
-                                ,"p|port",       "Host port to be mapped to container.", &dopts.ports
+                                ,"verbose",       "Log docker commands for debugging.", &dopts.verbose
+                                ,"w|workdir",     "Working directory, default current directory of host.", &workdir
+                                ,"n|name",        "Human-readable name for container." ,&dopts.name
+                                ,"c|command",     "Command to be executed by image entrypoint", &dopts.command
+                                ,"e|entrypoint",  "Alternative entrypoint.", &dopts.entrypoint
+                                ,"x|x11",         "Enable X11 GUI graphical user interface", &dopts.x11
+                                ,"u|user",        "Alternative user.", &dopts.user
+                                ,"m|home",        "Mount $HOME directory to /uhome dir. in container." ,&dopts.home
+                                ,"v|volume",      "Volume to be mounted.", &dopts.volumes
+                                ,"p|port",        "Host port to be mapped to container.", &dopts.ports
+                                ,"pr|privileged", "Enable privileged mode, useful for GDB", &dopts.privileged
+                                ,"g|gdb",         "Enable GDB (GNU Debugger) and PTrace inside docker containers.", &dopts.gdb 
                                 /* ,"r|drmc",       "Dont remove container (default false)", &dont_remove_container */
                         );
 
@@ -183,6 +191,8 @@ void docker_shell(DockerOptions* dpt)
                 docker_args ~= ["--name", dpt.name];
         }
 
+        if(dpt.privileged) { docker_args ~= ["--privileged"]; }
+
         // Directory to be mounted to '/work' dir in container. 
         string wdir = dpt.workdir != null ? dpt.workdir : cwd;
 
@@ -210,7 +220,10 @@ void docker_shell(DockerOptions* dpt)
                 docker_args ~= ["--entrypoint=" ~ dpt.entrypoint];
         }
 
-        
+        // Enable GDB inside Docker container (Useful for debugging C, C++, DLang or Rust)
+        // Reference: https://leimao.github.io/blog/Debug-CPP-In-Docker-Container/
+        if(dpt.gdb) {  docker_args ~= ["--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ]; }
+
         foreach (v; dpt.volumes)
         {                        
                 //assert(v.split(":").length != 2);
