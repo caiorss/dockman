@@ -62,7 +62,7 @@ following commands:
 *** Show help
 
 #+BEGIN_SRC sh 
-   $ dockman --help
+   $ dockman 
     dockman - Docker Manager Tool
 
    Usage: $ dockman <SUBCOMMAND> <DOCKER-IMAGE> [<OPTIONS>...]
@@ -83,19 +83,21 @@ following commands:
      $ dockman vs <DOCKER-VOLUME-NAME>
 
     Options:
-          --verbose Log docker commands for debugging.
-    -w    --workdir Working directory, default current directory of host.
-    -n       --name Human-readable name for container.
-    -c    --command Command to be executed by image entrypoint
-    -e --entrypoint Alternative entrypoint.
-    -x        --x11 Enable X11 GUI graphical user interface
-    -u       --user Alternative user.
-    -m       --home Mount $HOME directory to /uhome dir. in container.
-    -v     --volume Volume to be mounted.
-    -p       --port Host port to be mapped to container.
-   -pr --privileged Enable privileged mode, useful for GDB
-    -g        --gdb Enable GDB (GNU Debugger) and PTrace inside docker containers.
-    -h       --help This help information.
+            --verbose Log docker commands for debugging.
+    -w      --workdir Working directory, default current directory of host.
+    -n         --name Human-readable name for container.
+    -c      --command Command to be executed by image entrypoint
+    -e   --entrypoint Alternative entrypoint.
+    -x          --x11 Enable X11 GUI graphical user interface
+    -u         --user Alternative user.
+    -m         --home Mount $HOME directory to /uhome dir. in container.
+    -v       --volume Volume to be mounted.
+    -p         --port Host port to be mapped to container.
+    -q --expose-ports Expose all container ports to host (same as --network=host).
+   -pr   --privileged Enable privileged mode, useful for GDB
+    -g          --gdb Enable GDB (GNU Debugger) and PTrace inside docker containers.
+    -h         --help This help information.
+
 #+END_SRC
 
 *** Open a shell in a Docker named-volume 
@@ -176,8 +178,17 @@ through any web browser at URL http://localhost.
 #+BEGIN_SRC sh 
   $ cd test_code 
   
-   $ dockman service nginx -p=80:80 --name=nginx-http-server -v=~/projects:/srv -v=./nginx.conf:/etc/nginx/conf.d/default.conf
+   $ dockman service nginx -p=80:80 --name=nginx-http-server -v=~/projects:/srv -v=./nginx.conf:/etc/nginx/conf.d/default.confw
    f4947564b5520d358e5708462b59e5369b7d3750b578c0666dfbe3baeff21114
+#+END_SRC
+
+Or the server can also be launched exposing all container
+ports, defined in Dockerfile, to the host with the flag --expose-ports
+or (-q).
+
+#+BEGIN_SRC sh 
+  $ dockman service nginx --expose-ports --name=nginx-http-server -v=~/projects:/srv -v=./nginx.conf:/etc/nginx/conf.d/default.conf
+  $ dockman service nginx -q --name=nginx-http-server -v=~/projects:/srv -v=./nginx.conf:/etc/nginx/conf.d/default.conf
 #+END_SRC
 
 Check container status: 
