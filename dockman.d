@@ -42,6 +42,10 @@ struct DockerOptions {
         bool     privileged = false;
         // Enable GDB (GNU Debugger) usage in Docker containers. 
         bool     gdb        = false;
+        // If true, all ports listed in the Dockerfile 
+        // with EXPOSE statements ('EXPOSE 8080/tcp')
+        //  are mapped to host 
+        bool    expose_ports = false;
 }
 
 /** Main function is the entry-point of a D-program */
@@ -81,6 +85,7 @@ void main(string[] args)
                                 ,"m|home",        "Mount $HOME directory to /uhome dir. in container." ,&dopts.home
                                 ,"v|volume",      "Volume to be mounted.", &dopts.volumes
                                 ,"p|port",        "Host port to be mapped to container.", &dopts.ports
+                                ,"q|expose-ports",  "Expose all container ports to host (same as --network=host).", &dopts.expose_ports
                                 ,"pr|privileged", "Enable privileged mode, useful for GDB", &dopts.privileged
                                 ,"g|gdb",         "Enable GDB (GNU Debugger) and PTrace inside docker containers.", &dopts.gdb 
                                 /* ,"r|drmc",       "Dont remove container (default false)", &dont_remove_container */
@@ -246,6 +251,10 @@ void docker_shell(DockerOptions* dpt)
         foreach (p; dpt.ports)
         {
                 docker_args ~= ["-p", p];
+        }
+
+        if(dpt.expose_ports) {
+                docker_args ~= ["--network=host"];
         }
         
         docker_args ~= [ dpt.docker_image ];
