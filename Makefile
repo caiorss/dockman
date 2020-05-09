@@ -1,6 +1,6 @@
 # Build app using system-installed 'dmd' D-lang compiler 
 build1: dockman.d
-	dmd dockman.d -of=dockman.bin
+	dub run 
 
 # Build using docker image from:
 #  + https://github.com/dlangchina/docker-dlang
@@ -13,7 +13,7 @@ build2:
 
 # Assumes that ~/bin directory is in $PATH variable 
 install:
-	cp -v ./dockman.bin ~/bin/dockman
+	cp -v ./dockman ~/bin/dockman
 
 clean:
 	rm -rf -v *.bin *.o
