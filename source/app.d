@@ -85,13 +85,21 @@ void main(string[] args)
                 
                         io.writeln(" dockman - Docker Manager Tool\n");
                         io.writeln("Usage: $ dockman <SUBCOMMAND> <DOCKER-IMAGE> [<OPTIONS>...]");
-                        
-                        io.writeln("\n => Run docker-image unix shell (REPL) or any other entrypoint.");
+
+                        io.writeln("\n => Run docker-image's default entrypoint");
+                        io.writeln("  $ dockman run <DOCKER-IMAGE> [<OPTIONS>...] ");
+                        io.writeln("  $ dockman r <DOCKER-IMAGE> [<OPTIONS>...] ");
+
+                        io.writeln("\n => Run docker-image's default unix shell (REPL) or any other entrypoint.");
                         io.writeln("  $ dockman shell <DOCKER-IMAGE> [<OPTIONS>...] ");
-                        io.writeln("  $ dockman sh <DOCKER-IMAGE> [<OPTIONS>...] ");
+                        io.writeln("  $ dockman s <DOCKER-IMAGE> [<OPTIONS>...] ");
+
+                        io.writeln("\n => Run docker-image's bash (REPL) or any other entrypoint.");
+                        io.writeln("  $ dockman bash <DOCKER-IMAGE> [<OPTIONS>...] ");
+                        io.writeln("  $ dockman b <DOCKER-IMAGE> [<OPTIONS>...] ");
                         
                         io.writeln("\n => Run docker-image as service (aka daemon) ");
-                        io.writeln("  $ dockman serive <DOCKER-IMAGE> [<OPTIONS>...] ");                        
+                        io.writeln("  $ dockman service <DOCKER-IMAGE> [<OPTIONS>...] ");                        
                         io.writeln("  $ dockman sr <DOCKER-IMAGE> [<OPTIONS>...] ");                        
 
                         io.writeln("\n => Build docker image from file ");
