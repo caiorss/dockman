@@ -1,5 +1,5 @@
 # Build app using system-installed 'dmd' D-lang compiler 
-build1: dockman.d
+build1: 
 	dub run 
 
 # Build using docker image from:
