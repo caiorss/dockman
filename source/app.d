@@ -125,12 +125,30 @@ void main(string[] args)
                         return;
                 }
 
-                // Run docker container in interactive mode (tty) or batch mode
-                if(args[1] == "shell" || args[1] == "sh")
+                // Run docker container default entrypoint
+                if(args[1] == "run" || args[1] == "r")
+                {
+                        docker_shell( &dopts );
+                }
+
+                // Run docker container default shell (sh) in interactive mode (tty) or batch mode
+                if(args[1] == "shell" || args[1] == "s")
+                {
+                        dopts.entrypoint = "sh";
                         docker_shell( &dopts );                      
+                }
+
+                // Run docker container bash
+                if(args[1] == "bash" || args[1] == "b")
+                {
+                        dopts.entrypoint = "bash";
+                        docker_shell( &dopts );
+                }
+
 
                 // Run docker container as service (daemon)
-                if(args[1] == "service" || args[1] == "sr"){
+                if(args[1] == "service" || args[1] == "sr")
+                {
                         dopts.detach = true;
                         dopts.remove = dopts.name == null;
                         docker_shell( &dopts );        
