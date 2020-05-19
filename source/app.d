@@ -51,19 +51,8 @@ struct DockerOptions {
 /** Main function is the entry-point of a D-program */
 void main(string[] args) 
 {               
-        bool verbose      = false;
-        bool home         = false;
-        bool x11          = false;        
-        string entrypoint = null;
-        string command    = null;
-        string user       = null;
-        string name       = null;
-        string workdir    = null; 
-        string[] volumes  = null;
-        string[] ports    = null;
 
         DockerOptions dopts;
-
         // bool dont_remove_container = false;
 
         opt.GetoptResult opt_result;
@@ -76,7 +65,7 @@ void main(string[] args)
                 opt_result = opt.getopt(
                                 args
                                 ,"verbose",       "Log docker commands for debugging.", &dopts.verbose
-                                ,"w|workdir",     "Working directory, default current directory of host.", &workdir
+                                ,"w|workdir",     "Working directory, default current directory of host.", &dopts.workdir
                                 ,"n|name",        "Human-readable name for container." ,&dopts.name
                                 ,"c|command",     "Command to be executed by image entrypoint", &dopts.command
                                 ,"e|entrypoint",  "Alternative entrypoint.", &dopts.entrypoint
