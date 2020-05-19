@@ -1,4 +1,6 @@
-* dockman - Docker Manager Tool 
+#+TITLE: Docker Front-End Tool 
+
+* dockman - Docker Front-End Tool 
 ** Introduction 
 
 This tool simplifies using of docker containers for testing and
@@ -62,17 +64,25 @@ following commands:
 *** Show help
 
 #+BEGIN_SRC sh 
-   $ dockman 
+   $ ./dockman 
     dockman - Docker Manager Tool
 
    Usage: $ dockman <SUBCOMMAND> <DOCKER-IMAGE> [<OPTIONS>...]
 
-    => Run docker-image unix shell (REPL) or any other entrypoint.
+    => Run docker-image's default entrypoint
+     $ dockman run <DOCKER-IMAGE> [<OPTIONS>...] 
+     $ dockman r <DOCKER-IMAGE> [<OPTIONS>...] 
+
+    => Run docker-image's default unix shell (REPL) or any other entrypoint.
      $ dockman shell <DOCKER-IMAGE> [<OPTIONS>...] 
-     $ dockman sh <DOCKER-IMAGE> [<OPTIONS>...] 
+     $ dockman s <DOCKER-IMAGE> [<OPTIONS>...] 
+
+    => Run docker-image's bash (REPL) or any other entrypoint.
+     $ dockman bash <DOCKER-IMAGE> [<OPTIONS>...] 
+     $ dockman b <DOCKER-IMAGE> [<OPTIONS>...] 
 
     => Run docker-image as service (aka daemon) 
-     $ dockman serive <DOCKER-IMAGE> [<OPTIONS>...] 
+     $ dockman service <DOCKER-IMAGE> [<OPTIONS>...] 
      $ dockman sr <DOCKER-IMAGE> [<OPTIONS>...] 
 
     => Build docker image from file 
@@ -248,6 +258,10 @@ File: nginx.conf
           }
   }
 #+END_SRC
+
+*** SAMBA/SMB Windows-share server 
+
+
 
 *** Docker image for compiling and running TypeScript 
 
